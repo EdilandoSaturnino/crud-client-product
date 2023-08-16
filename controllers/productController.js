@@ -22,10 +22,12 @@ exports.createProduct = async (req, res) => {
 };
 
 
-exports.getProductsByUser = async (req, res) => {
+exports.getProductsByClient = async (req, res) => {
     try {
-        const userId = req.params.userId;
-        const products = await Product.find({ userId: userId });
+        const clientId = req.params.clientId;
+        console.log("Buscando produtos para o cliente:", clientId);
+        const products = await Product.find({ userId: clientId });
+        console.log("Produtos encontrados:", products);
         if (products.length === 0) {
             res.status(404).json({ error: 'Produto não encontrado' });
             return;

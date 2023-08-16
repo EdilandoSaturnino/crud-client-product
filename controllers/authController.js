@@ -1,8 +1,13 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 exports.login = async (req, res) => {
+
     try {
+        /* usa .env ao invés de um gerador, é melhor e seguro */
+        const secret = crypto.randomBytes(48).toString('hex');
         const { nome, email, senha } = req.body;
         const user = await User.findOne({ nome, email });
 
@@ -18,8 +23,22 @@ exports.login = async (req, res) => {
             return;
         }
 
-        res.json({ message: 'Login realizado com sucesso!' });
+        const token = jwt.sign(
+            { id: user._id },
+            secret,
+            { expiresIn: '7d' }
+        );
+
+        const userWithoutPassword = { ...user._doc };
+        delete userWithoutPassword.senha;
+
+        res.json({
+            message: 'Login realizado com sucesso!',
+            token,
+            user: userWithoutPassword
+        });
     } catch (err) {
+        console.log(err)
         res.status(500).json({ error: 'Falha no login' });
     }
 };
