@@ -4,12 +4,10 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 exports.login = async (req, res) => {
-
     try {
-        /* usa .env ao invés de um gerador, é melhor e seguro */
-        const secret = crypto.randomBytes(48).toString('hex');
-        const { nome, email, senha } = req.body;
-        const user = await User.findOne({ nome, email });
+        const secret = process.env.JWT_SECRET || crypto.randomBytes(48).toString('hex');
+        const { email, senha } = req.body;
+        const user = await User.findOne({ email });
 
         if (!user) {
             res.status(404).json({ error: 'Usuário não encontrado' });
@@ -24,7 +22,10 @@ exports.login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: user._id },
+            {
+                id: user._id,
+                nome: user.nome,
+            },
             secret,
             { expiresIn: '7d' }
         );
@@ -35,10 +36,10 @@ exports.login = async (req, res) => {
         res.json({
             message: 'Login realizado com sucesso!',
             token,
-            user: userWithoutPassword
+            user: user._doc
         });
     } catch (err) {
-        console.log(err)
+        console.log(err);
         res.status(500).json({ error: 'Falha no login' });
     }
 };

@@ -3,15 +3,16 @@ const bcrypt = require('bcrypt');
 
 exports.createUser = async (req, res) => {
     try {
-        const { email, senha } = req.body;
+        const { nome, email, senha } = req.body; 
         const senhaHashed = await bcrypt.hash(senha, 10);
 
-        const novoUsuario = await User.create({ email, senha: senhaHashed });
+        const novoUsuario = await User.create({ nome, email, senha: senhaHashed });
         return res.status(201).json({ msg: "Usuário criado com sucesso", user: novoUsuario });
     } catch (err) {
         res.status(500).json({ error: 'Falha ao criar um usuário' });
     }
 };
+
 
 exports.getUsers = async (req, res) => {
     try {
@@ -57,7 +58,7 @@ exports.deleteUser = async (req, res) => {
 
 exports.getUserById = async (req, res) => {
     try {
-        const { id } = req.params; 
+        const { id } = req.params;
         const usuario = await User.findById(id);
 
         if (!usuario) {
